@@ -8,6 +8,7 @@ export class Login {
         axios.get("/login?_api=login").then((value) => {
 
         }).catch( (error) =>{
+            // tslint:disable-next-line:no-console
             console.log(error);
         });
     }
