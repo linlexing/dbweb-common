@@ -1,6 +1,7 @@
 export interface IElement {
     Name: string;
+    Label:string;
     Category: string;
-    Public: boolean;
+    NewWindow: boolean;
     SignStr:string;
 }
