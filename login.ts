@@ -6,9 +6,9 @@ interface ILoginParam {
     userName: string;
     password: string;
 }
-interface ILoginResult{
-    IndexElement :string;
-    Elements:IElement[];
+export interface ILoginResult {
+    IndexElement: string;
+    Elements: IElement[];
 }
 export class Login {
     public static getPublicElement(): AxiosPromise<IElement[]> {
