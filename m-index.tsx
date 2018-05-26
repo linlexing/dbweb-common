@@ -1,5 +1,5 @@
 import * as React from 'react';
-import { RouteComponentProps, withRouter } from 'react-router-dom';
+import { RouteComponentProps } from 'react-router-dom';
 
 import { IController } from '../../dbweb-core/model/controller';
 
@@ -11,4 +11,4 @@ class Index extends React.Component<IIndex> {
         return <div>{this.props.element.Name}</div>;
     }
 }
-export default { Name: "index", Component: withRouter(Index), Reducer: (state: any, action: any) => state }
+export default { Name: "index", Component: Index, Reducer: (state: any, action: any) => state }
