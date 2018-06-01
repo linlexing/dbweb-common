@@ -1,6 +1,7 @@
-import Index from './m-index';
-
+import Index from "./index/index";
+import recordview from "./recordview";
 export { Index };
 export default {
-    index: Index
-}
+    index: Index,
+    recordview
+};
