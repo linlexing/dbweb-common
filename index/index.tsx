@@ -1,11 +1,11 @@
 import { Button, Input } from "@material-ui/core";
 import * as React from "react";
 import { RouteComponentProps } from "react-router-dom";
-import { compose, Dispatch } from "redux";
+import { Dispatch } from "redux";
+import { eleComponent } from "src/dbweb-core/store";
 
 import { APIGet } from "../../../dbweb-core/api";
-import { IElementComponent, withElement, withReducer } from "../../../dbweb-core/eleContext";
-import { eleConnect } from "../../../dbweb-core/store";
+import { IElementComponent } from "../../../dbweb-core/eleContext";
 import * as actions from "./action";
 import reducer from "./reducer";
 
@@ -35,4 +35,4 @@ const mapDispatch = (dispatch: Dispatch) => {
         userNameChange: (event: any) => dispatch(actions.changeUserName(event.target.value))
     };
 };
-export default compose(withReducer(reducer), withElement, eleConnect(mapState, mapDispatch))(Index);
+export default eleComponent(mapState, mapDispatch, reducer)(Index);
