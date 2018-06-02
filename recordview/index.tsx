@@ -30,8 +30,8 @@ class Index extends React.PureComponent<IIndex> {
         APIGet("index", "test").then(() => alert("ok"));
     }
 }
-const mapState = (state: any, dstate: any) => {
-    return dstate || { userName: "" };
+const mapState = (state: any) => {
+    return state || { userName: "" };
 };
 const mapDispatch = (dispatch: Dispatch, ownProps: IIndex) => {
     return {
