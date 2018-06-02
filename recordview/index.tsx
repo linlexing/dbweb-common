@@ -2,10 +2,10 @@ import { Button, Input } from "@material-ui/core";
 import * as React from "react";
 import { Dispatch } from "react-redux";
 import { RouteComponentProps } from "react-router-dom";
+import { compose } from "redux";
 
 import { APIGet } from "../../../dbweb-core/api";
-import { IElementComponent, withElement } from "../../../dbweb-core/eleContext";
-import { IModule } from "../../../dbweb-core/model";
+import { IElementComponent, withElement, withReducer } from "../../../dbweb-core/eleContext";
 import { eleConnect } from "../../../dbweb-core/store";
 import * as actions from "./action";
 import reducer from "./reducer";
@@ -38,8 +38,4 @@ const mapDispatch = (dispatch: Dispatch, ownProps: IIndex) => {
         userNameChange: (event: any) => dispatch(actions.changeUserName(event.target.value))
     };
 };
-export default {
-    name: "recordview",
-    component: withElement(eleConnect(mapState, mapDispatch)(Index)),
-    reducer
-} as IModule;
+export default compose(withReducer(reducer), withElement, eleConnect(mapState, mapDispatch))(Index);
