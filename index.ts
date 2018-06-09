@@ -1,5 +1,7 @@
-import Index from "./index/index";
-export { Index };
+import index from './index/index';
+import version from './version';
+
 export default {
-    index: Index
+    index,
+    version
 };
