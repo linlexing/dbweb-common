@@ -1,5 +1,7 @@
 import Index from "./index/index";
+import Login from "./login/index";
 export { Index };
 export default {
-    index: Index
+  index: Index,
+  login: Login
 };
