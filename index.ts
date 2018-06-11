@@ -1,7 +1,9 @@
-import Index from "./index/index";
-import Login from "./login/index";
-export { Index };
+import index from "./index/index";
+import login from "./login/index";
+import version from "./version";
+
 export default {
-  index: Index,
-  login: Login
+  index,
+  version,
+  login
 };
