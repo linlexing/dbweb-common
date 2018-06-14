@@ -1,5 +1,5 @@
 import { createAction } from 'typesafe-actions';
-interface IChangeLog {
+export interface IChangeLog {
     Version: number;
     Time: Date;
     Logs: string[];

@@ -7,7 +7,7 @@ import { IElement } from 'src/dbweb-core/model';
 import { APIGet } from '../../../dbweb-core/api';
 import { IElementComponent } from '../../../dbweb-core/eleContext';
 import { eleComponent } from '../../../dbweb-core/store';
-import { doSetVersions, IVersion } from './action';
+import { doSetVersions, IChangeLog, IVersion } from './action';
 import reducer from './reducer';
 
 interface IProps extends IElementComponent, WithStyles<typeof styles> {
@@ -44,45 +44,43 @@ class Version extends React.PureComponent<IProps> {
     }
     public render() {
         const { classes } = this.props;
+        const verLogs = (log: IChangeLog) => (
+            <ListItem key={log.Version} style={{ paddingTop: 0, paddingBottom: 0 }}>
+                <div
+                    style={{
+                        display: 'flex',
+                        flexDirection: 'row',
+                        alignItems: 'flex-start'
+                    }}>
+                    <Typography variant="subheading" style={{ paddingTop: 12 }}>
+                        {new Date(log.Time).toJSON().substr(0, 10)}
+                    </Typography>
+                    <List style={{ paddingTop: 10, paddingBottom: 0 }}>
+                        {log.Logs.map((one, idx) => (
+                            <ListItem style={{ paddingTop: 2, paddingBottom: 2 }} key={idx}>
+                                {one}
+                            </ListItem>
+                        ))}
+                    </List>
+                </div>
+            </ListItem>
+        );
+        const moduleVer = (ver: IVersion) => (
+            <Grid item={true} key={ver.Name}>
+                <Paper className={classes.paper}>
+                    <div style={{ display: 'flex', flexDirection: 'row', alignItems: 'center' }}>
+                        <Typography variant="title">{ver.Name}</Typography>
+                        <Avatar className={classes.avatar}>{ver.MaxVer}</Avatar>
+                    </div>
+                    <List>{ver.Logs.map(verLogs)}</List>
+                </Paper>
+            </Grid>
+        );
         if (this.props.versions) {
             return (
                 <div className={classes.root}>
                     <Grid container={true} spacing={16} direction="column">
-                        {this.props.versions.map(ver => (
-                            <Grid item={true} key={ver.Name}>
-                                <Paper className={classes.paper}>
-                                    <div style={{ display: 'flex', flexDirection: 'row', alignItems: 'center' }}>
-                                        <Typography variant="title">{ver.Name}</Typography>
-                                        <Avatar className={classes.avatar}>{ver.MaxVer}</Avatar>
-                                    </div>
-                                    <List>
-                                        {ver.Logs.map(log => (
-                                            <ListItem key={log.Version} style={{ paddingTop: 0, paddingBottom: 0 }}>
-                                                <div
-                                                    style={{
-                                                        display: 'flex',
-                                                        flexDirection: 'row',
-                                                        alignItems: 'flex-start'
-                                                    }}>
-                                                    <Typography variant="subheading" style={{ paddingTop: 12 }}>
-                                                        {new Date(log.Time).toJSON().substr(0, 10)}
-                                                    </Typography>
-                                                    <List style={{ paddingTop: 10, paddingBottom: 0 }}>
-                                                        {log.Logs.map((one, idx) => (
-                                                            <ListItem
-                                                                style={{ paddingTop: 2, paddingBottom: 2 }}
-                                                                key={idx}>
-                                                                {one}
-                                                            </ListItem>
-                                                        ))}
-                                                    </List>
-                                                </div>
-                                            </ListItem>
-                                        ))}
-                                    </List>
-                                </Paper>
-                            </Grid>
-                        ))}
+                        {this.props.versions.map(moduleVer)}
                     </Grid>
                 </div>
             );
