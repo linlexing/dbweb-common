@@ -1,9 +1,11 @@
-import index from "./index/index";
-import login from "./login/index";
-import version from "./version";
+import elasticview from './elasticview';
+import index from './indexPage';
+import login from './login';
+import version from './version';
 
 export default {
-  index,
-  version,
-  login
+    index,
+    version,
+    login,
+    elasticview
 };
