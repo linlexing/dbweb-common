@@ -1,4 +1,4 @@
-import { Dispatch } from 'react-redux';
+import { Dispatch } from 'redux';
 import { APIPost } from 'src/dbweb-core/api';
 import { createAction } from 'typesafe-actions';
 

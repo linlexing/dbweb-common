@@ -1,5 +1,4 @@
 import * as React from 'react';
-import { Dispatch } from 'redux';
 import { IElementComponent } from 'src/dbweb-core/eleContext';
 import { eleComponent } from 'src/dbweb-core/store';
 
@@ -24,9 +23,7 @@ class ElasticView extends React.PureComponent<IElasticViewProps> {
 const mapState = (state: any) => {
     return state;
 };
-const mapDispatch = (dispatch: Dispatch) => {
-    return {
-        fetchData: actions.fetchData
-    };
+const mapDispatch = {
+    fetchData: actions.fetchData
 };
 export default eleComponent(mapState, mapDispatch, reducer)(ElasticView);
