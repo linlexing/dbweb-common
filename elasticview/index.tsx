@@ -9,16 +9,18 @@ import Table from '@material-ui/core/Table';
 import TableBody from '@material-ui/core/TableBody';
 import TableCell from '@material-ui/core/TableCell';
 import TableHead from '@material-ui/core/TableHead';
+import TablePagination from '@material-ui/core/TablePagination';
 import TableRow from '@material-ui/core/TableRow';
+import TextField from '@material-ui/core/TextField';
 import * as React from 'react';
 import { IElementComponent } from 'src/dbweb-core/eleContext';
 import { eleComponent } from 'src/dbweb-core/store';
-import { IRow } from './action';
 
 import * as actions from './action';
+import { IRow } from './action';
 import reducer from './reducer';
 
-
+import Button from '@material-ui/core/Button';
 
 const styles = (theme: Theme) => createStyles({
     root: {
@@ -48,7 +50,16 @@ const styles = (theme: Theme) => createStyles({
         backgroundColor: "#fff",
         position: "sticky",
         top: 0
-    }
+    },
+    tablePagination: {
+        backgroundColor: "#fff",
+        position: "sticky",
+        bottom: 0
+    },
+    searchButton: {
+        marginLeft: 10,
+        marginBottom: 10
+    },
 });
 
 
@@ -59,7 +70,9 @@ interface IElasticViewProps extends WithStyles<typeof styles>, IElementComponent
 class ElasticView extends React.PureComponent<IElasticViewProps> {
     public state = {
         column: '',
-        operator: ''
+        operator: '',
+        page: 0,
+        rowsPerPage: 50
     };
 
     public componentWillMount() {
@@ -75,6 +88,14 @@ class ElasticView extends React.PureComponent<IElasticViewProps> {
         this.setState({ [name]: event.target.value });
     };
 
+    public handleChangePage = (event: any, page: number) => {
+        this.setState({ page });
+    };
+
+    public handleChangeRowsPerPage = (event: any) => {
+        this.setState({ rowsPerPage: event.target.value });
+    };
+
     public render() {
         const mapping = {
             "NAME": "名称",
@@ -86,15 +107,20 @@ class ElasticView extends React.PureComponent<IElasticViewProps> {
         }
         const { classes } = this.props;
         const { data } = this.props;
+        const { rowsPerPage, page } = this.state;
 
         const tableRows: any = []
         const tableHeaders: any = []
+        const columns: any = []
+
         // tslint:disable-next-line:no-console
         console.log(data)
         // tslint:disable-next-line:forin
+        // data = data.slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage)
         for (const key in data[1]) {
             if (mapping[key] !== undefined) {
                 tableHeaders.push(<TableCell className={classes.tableHead} > {mapping[key]} </TableCell>);
+                columns.push(mapping[key]);
             }
 
         }
@@ -131,7 +157,7 @@ class ElasticView extends React.PureComponent<IElasticViewProps> {
                             <option value="DEPT-NAME">部门代码</option>
                             <option value="CATEGORY">类别</option>
                             <option value="CONTROLLER">模块</option>
-                            <option value="PUB">模块</option>
+                            <option value="PUB">公共</option>
                             <option value="OWNER">角色使用次数</option>
                         </NativeSelect>
 
@@ -170,6 +196,19 @@ class ElasticView extends React.PureComponent<IElasticViewProps> {
                         </NativeSelect>
 
                     </FormControl>
+                    <FormControl>
+                        <TextField
+                            id="searchContent"
+                            label="Search for..."
+                            margin="normal"
+                        />
+
+                    </FormControl>
+
+                    <Button variant="contained" color="primary" className={classes.searchButton}>
+                        确定
+                    </Button>
+
                 </div>
                 <div>
                     <Paper className={classes.tableContainer}>
@@ -180,9 +219,49 @@ class ElasticView extends React.PureComponent<IElasticViewProps> {
                                 </TableRow>
                             </TableHead>
                             <TableBody>
-                                {tableRows}
+                                {/* {tableRows} */}
+                                {data
+                                    .slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage)
+                                    .map(n => {
+                                        const rows = []
+
+                                        for (const key in mapping) {
+                                            if (key != null) {
+                                                rows.push(<TableCell>{n[key]}</TableCell>)
+                                            }
+                                        }
+                                        return (
+                                            <TableRow
+                                                hover={true}
+
+                                                role="checkbox"
+
+                                                tabIndex={-1}
+                                                key={n.id}
+
+                                            >
+                                                {rows}
+                                            </TableRow>
+                                        );
+                                    })}
                             </TableBody>
                         </Table>
+                        <TablePagination
+                            className={classes.tablePagination}
+                            component="div"
+                            count={data.length}
+                            rowsPerPage={rowsPerPage}
+                            page={page}
+                            backIconButtonProps={{
+                                'aria-label': 'Previous Page',
+                            }}
+                            nextIconButtonProps={{
+                                'aria-label': 'Next Page',
+                            }}
+                            onChangePage={this.handleChangePage}
+                            onChangeRowsPerPage={this.handleChangeRowsPerPage}
+                            rowsPerPageOptions={[10, 25, 50]}
+                        />
                     </Paper>
                 </div>
             </div>
