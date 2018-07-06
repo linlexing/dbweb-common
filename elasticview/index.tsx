@@ -19,6 +19,7 @@ import { eleComponent } from 'src/dbweb-core/store';
 import * as actions from './action';
 import { IRow } from './action';
 import reducer from './reducer';
+import { IFetchDataParam, ITerm, Order } from './service';
 
 import Button from '@material-ui/core/Button';
 
@@ -66,21 +67,37 @@ const styles = (theme: Theme) => createStyles({
 interface IElasticViewProps extends WithStyles<typeof styles>, IElementComponent {
     fetchData: typeof actions.fetchData;
     data: IRow[];
+    searchRequestData: IFetchDataParam
 }
 class ElasticView extends React.PureComponent<IElasticViewProps> {
     public state = {
+
+        DisplayColumns: [
+            { Column: "NAME", Label: "名称", Hidden: false, Order: Order.None },
+            { Column: "LABEL", Label: "标签", Hidden: false, Order: Order.None },
+            { Column: "CONTROLLER", Label: "模块", Hidden: false, Order: Order.None },
+            { Column: "DEPT", Label: "部门代码", Hidden: false, Order: Order.None },
+            { Column: "PUB", Label: "公共", Hidden: false, Order: Order.None },
+            { Column: "CATEGORY", Label: "类别", Hidden: false, Order: Order.None },
+        ],
         column: '',
         operator: '',
+        searchContent: '',
         page: 0,
         rowsPerPage: 50
     };
+
 
     public componentWillMount() {
         if (this.props.element.SignStr) {
             // tslint:disable-next-line:no-console
             console.log('fetchdata');
             // this.props.fetchData(this.props.element.Name, this.props.element.SignStr, { Query: [{ Column: "DEPT", Operate: "=", Value: "r" }] });
-            this.props.fetchData(this.props.element.Name, this.props.element.SignStr, {});
+            let { searchRequestData } = this.props;
+            searchRequestData = {
+                DisplayColumns: this.state.DisplayColumns
+            }
+            this.props.fetchData(this.props.element.Name, this.props.element.SignStr, searchRequestData);
         }
     }
 
@@ -95,6 +112,22 @@ class ElasticView extends React.PureComponent<IElasticViewProps> {
     public handleChangeRowsPerPage = (event: any) => {
         this.setState({ rowsPerPage: event.target.value });
     };
+
+    public handleSearch = () => {
+        let { searchRequestData } = this.props;
+        const { column, operator, searchContent } = this.state;
+        let QueryList: ITerm[] = [];
+        if (column !== "" && operator !== "") {
+            QueryList = [{ Column: column, Operate: operator, Value: searchContent }];
+        }
+        searchRequestData = {
+            Query: QueryList,
+            DisplayColumns: this.state.DisplayColumns
+        }
+        if (this.props.element.SignStr) {
+            this.props.fetchData(this.props.element.Name, this.props.element.SignStr, searchRequestData);
+        }
+    }
 
     public render() {
         const mapping = {
@@ -112,15 +145,17 @@ class ElasticView extends React.PureComponent<IElasticViewProps> {
         const tableRows: any = []
         const tableHeaders: any = []
         const columns: any = []
+        const columnOptions: any = []
 
         // tslint:disable-next-line:no-console
         console.log(data)
         // tslint:disable-next-line:forin
         // data = data.slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage)
-        for (const key in data[1]) {
+        for (const key in mapping) {
             if (mapping[key] !== undefined) {
                 tableHeaders.push(<TableCell className={classes.tableHead} > {mapping[key]} </TableCell>);
                 columns.push(mapping[key]);
+                columnOptions.push(<option value={key}>{mapping[key]}</option>)
             }
 
         }
@@ -150,15 +185,9 @@ class ElasticView extends React.PureComponent<IElasticViewProps> {
                             onChange={this.handleChange('column')}
                             input={<Input name="column" id="column" />}
                         >
+
                             <option value="" />
-                            <option value="NAME">名称</option>
-                            <option value="LABEL">标签</option>
-                            <option value="DEPT">部门代码</option>
-                            <option value="DEPT-NAME">部门代码</option>
-                            <option value="CATEGORY">类别</option>
-                            <option value="CONTROLLER">模块</option>
-                            <option value="PUB">公共</option>
-                            <option value="OWNER">角色使用次数</option>
+                            {columnOptions}
                         </NativeSelect>
 
                     </FormControl>
@@ -201,11 +230,12 @@ class ElasticView extends React.PureComponent<IElasticViewProps> {
                             id="searchContent"
                             label="Search for..."
                             margin="normal"
+                            onChange={this.handleChange("searchContent")}
                         />
 
                     </FormControl>
 
-                    <Button variant="contained" color="primary" className={classes.searchButton}>
+                    <Button variant="contained" color="primary" className={classes.searchButton} onClick={this.handleSearch}>
                         确定
                     </Button>
 

@@ -1,15 +1,16 @@
-enum Order {
+export enum Order {
     None = 'NONE',
     Asc = 'ASC',
     Desc = 'DESC'
 }
-interface ITerm {
+export interface ITerm {
     Column: string;
     Operate: string;
     Value: string;
 }
 interface IDisplayColumn {
     Column: string;
+    Label: string;
     Hidden: boolean;
     Order: Order;
 }
