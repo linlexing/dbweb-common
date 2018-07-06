@@ -37,7 +37,7 @@ const styles = (theme: Theme) => createStyles({
 
     },
     tableContainer: {
-        height: "76vh",
+        height: "80vh",
         overflowY: 'scroll'
     },
     selectEmpty: {
@@ -61,6 +61,26 @@ const styles = (theme: Theme) => createStyles({
         marginLeft: 10,
         marginBottom: 10
     },
+    bottomToolBar: {
+        position: "absolute",
+        bottom: 0,
+        height: "2.5em",
+        margin: 10,
+        fontSize: 14,
+        zIndex: 999
+    },
+    toolbarButtonLeft: {
+        borderRadius: "10px 0px 0px 10px",
+    },
+    toolbarButtonMiddle: {
+        borderRadius: 0
+    },
+    toolbarButtonRight: {
+        borderRadius: "0px 10px 10px 0px",
+    },
+    recordNum: {
+        margin: 20
+    }
 });
 
 
@@ -112,6 +132,13 @@ class ElasticView extends React.PureComponent<IElasticViewProps> {
     public handleChangeRowsPerPage = (event: any) => {
         this.setState({ rowsPerPage: event.target.value });
     };
+
+    public handleKeyPress = (event: any) => {
+        // Trigger search when Enter is pressed in textfield
+        if (event.key === 'Enter') {
+            this.handleSearch();
+        }
+    }
 
     public handleSearch = () => {
         let { searchRequestData } = this.props;
@@ -231,6 +258,7 @@ class ElasticView extends React.PureComponent<IElasticViewProps> {
                             label="Search for..."
                             margin="normal"
                             onChange={this.handleChange("searchContent")}
+                            onKeyPress={this.handleKeyPress}
                         />
 
                     </FormControl>
@@ -263,12 +291,8 @@ class ElasticView extends React.PureComponent<IElasticViewProps> {
                                         return (
                                             <TableRow
                                                 hover={true}
-
-                                                role="checkbox"
-
                                                 tabIndex={-1}
                                                 key={n.id}
-
                                             >
                                                 {rows}
                                             </TableRow>
@@ -294,6 +318,24 @@ class ElasticView extends React.PureComponent<IElasticViewProps> {
                         />
                     </Paper>
                 </div>
+                <div className={classes.bottomToolBar}>
+                    <span className={classes.recordNum}>记录总数：{data.length}</span>
+                    <Button variant="outlined" size="small" className={classes.toolbarButtonLeft}>
+                        新增
+                    </Button>
+                    <Button variant="outlined" size="small" className={classes.toolbarButtonMiddle}>
+                        成批替换
+                    </Button>
+                    <Button variant="outlined" size="small" className={classes.toolbarButtonMiddle}>
+                        导出数据
+                    </Button>
+                    <Button variant="outlined" size="small" className={classes.toolbarButtonMiddle}>
+                        汇总
+                    </Button>
+                    <Button variant="outlined" size="small" className={classes.toolbarButtonRight}>
+                        连续操作
+                    </Button>
+                </div>
             </div>
         );
     }
@@ -305,7 +347,6 @@ const mapState = (state: any) => {
 };
 const mapDispatch = {
     fetchData: actions.fetchData
-    // changeOperator: actions.changeOperator
 };
 
 const StyledElasticView = withStyles(styles)(ElasticView);
