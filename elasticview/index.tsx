@@ -37,6 +37,7 @@ const styles = (theme: Theme) =>
     },
     tableContainer: {
       height: "80vh",
+      overflowX: "scroll",
       overflowY: "scroll"
     },
     selectEmpty: {
@@ -52,7 +53,7 @@ const styles = (theme: Theme) =>
 
       zIndex: 999
     },
-    tableRows: {  },
+    tableRows: {},
     tablePagination: {
       backgroundColor: "#fff",
       position: "sticky",
@@ -105,7 +106,8 @@ class ElasticView extends React.PureComponent<IElasticViewProps> {
     operator: "",
     searchContent: "",
     page: 0,
-    rowsPerPage: 50
+    rowsPerPage: 50,
+    selected: [""]
   };
 
   public componentWillMount() {
@@ -124,6 +126,36 @@ class ElasticView extends React.PureComponent<IElasticViewProps> {
       );
     }
   }
+
+  public handleCheckAll = (event: any, checked: boolean) => {
+    if (checked) {
+      this.setState(state => ({ selected: this.props.data.map(n => n.id) }));
+      return;
+    }
+    this.setState({ selected: [] });
+  };
+
+  public isSelected = (id: any) => this.state.selected.indexOf(id) !== -1;
+
+  public handleClickRow = (event: any, id: string) => {
+    const { selected } = this.state;
+    const selectedIndex = selected.indexOf(id);
+    let newSelected: any[] = [];
+
+    if (selectedIndex === -1) {
+      newSelected = newSelected.concat(selected, id);
+    } else if (selectedIndex === 0) {
+      newSelected = newSelected.concat(selected.slice(1));
+    } else if (selectedIndex === selected.length - 1) {
+      newSelected = newSelected.concat(selected.slice(0, -1));
+    } else if (selectedIndex > 0) {
+      newSelected = newSelected.concat(
+        selected.slice(0, selectedIndex),
+        selected.slice(selectedIndex + 1)
+      );
+    }
+    this.setState({ selected: newSelected });
+  };
 
   public handleChange = (name: string) => (event: any) => {
     this.setState({ [name]: event.target.value });
@@ -165,40 +197,36 @@ class ElasticView extends React.PureComponent<IElasticViewProps> {
   };
 
   public render() {
-    const mapping = {
-      NAME: "名称",
-      LABEL: "标签",
-      CONTROLLER: "模块",
-      DEPT: "部门代码",
-      PUB: "公共",
-      CATEGORY: "类别"
-    };
     const { classes } = this.props;
     const { data } = this.props;
-    const { rowsPerPage, page } = this.state;
+    const { rowsPerPage, page, DisplayColumns } = this.state;
 
     const tableRows: any = [];
     const tableHeaders: any = [];
     const columns: any = [];
     const columnOptions: any = [];
 
+    const mapping = {};
+    for (const column of DisplayColumns) {
+      mapping[column.Column] = column.Label;
+    }
+
+    // tslint:disable-next-line:no-console
+    console.log(mapping);
+
     // tslint:disable-next-line:no-console
     console.log(data);
     // tslint:disable-next-line:forin
-    // data = data.slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage)
     for (const key in mapping) {
-      if (mapping[key] !== undefined) {
-        tableHeaders.push(
-          <TableCell className={classes.tableHead}> {mapping[key]} </TableCell>
-        );
-        columns.push(mapping[key]);
-        columnOptions.push(<option value={key}>{mapping[key]}</option>);
-      }
+      tableHeaders.push(
+        <TableCell className={classes.tableHead}> {mapping[key]} </TableCell>
+      );
+      columns.push(DisplayColumns[key]);
+      columnOptions.push(<option value={key}>{mapping[key]}</option>);
     }
-    // tslint:disable-next-line:prefer-for-of
+
     for (let i = 0; i < data.length; i++) {
       const tableCells = [];
-      // tslint:disable-next-line:forin
       for (const key in data[i]) {
         if (mapping[key] !== undefined) {
           tableCells.push(
@@ -282,7 +310,7 @@ class ElasticView extends React.PureComponent<IElasticViewProps> {
               <TableHead>
                 <TableRow>
                   <TableCell className={classes.tableHead}>
-                    <Checkbox />
+                    <Checkbox onChange={this.handleCheckAll} />
                   </TableCell>
                   {tableHeaders}
                 </TableRow>
@@ -292,9 +320,9 @@ class ElasticView extends React.PureComponent<IElasticViewProps> {
                   .slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage)
                   .map(n => {
                     const rows = [];
-
-                    for (const key in mapping) {
-                      if (key != null) {
+                    const isSelected = this.isSelected(n.id);
+                    for (const key in n) {
+                      if (key !== "id") {
                         rows.push(
                           <TableCell className={classes.tableRows}>
                             {n[key]}
@@ -303,9 +331,15 @@ class ElasticView extends React.PureComponent<IElasticViewProps> {
                       }
                     }
                     return (
-                      <TableRow hover={true} tabIndex={-1} key={n.id}>
+                      <TableRow
+                        hover={true}
+                        tabIndex={-1}
+                        key={n.id}
+                        // tslint:disable-next-line:jsx-no-lambda
+                        onClick={event => this.handleClickRow(event, n.id)}
+                      >
                         <TableCell className={classes.tableRows}>
-                          <Checkbox />
+                          <Checkbox checked={isSelected} />
                         </TableCell>
                         {rows}
                       </TableRow>
