@@ -30,30 +30,41 @@ const styles = (theme: Theme) =>
       display: "flex",
       flexWrap: "wrap"
     },
+    body: {
+      width: "calc(100vw - 260px)"
+    },
     formControl: {
       margin: theme.spacing.unit,
       minWidth: 120,
       fontSize: 12
     },
     tableContainer: {
-      height: "80vh",
-      overflowX: "scroll",
-      overflowY: "scroll"
+      width: "100%"
+    },
+    tableContent: {
+      height: "72vh",
+      overflow: "auto"
     },
     selectEmpty: {
       marginTop: theme.spacing.unit * 2
     },
-    table: {
-      minWidth: 700
+    tableCheckbox: {
+      backgroundColor: "#fff",
+      position: "sticky",
+      left: 0
+    },
+    tableCheckAll: {
+      backgroundColor: "#fff",
+      position: "sticky",
+      top: 0,
+      zIndex: 2
     },
     tableHead: {
       backgroundColor: "#fff",
       position: "sticky",
       top: 0,
-
-      zIndex: 999
+      zIndex: 1
     },
-    tableRows: {},
     tablePagination: {
       backgroundColor: "#fff",
       position: "sticky",
@@ -239,7 +250,7 @@ class ElasticView extends React.PureComponent<IElasticViewProps> {
       tableRows.push(<TableRow key={i}>{tableCells}</TableRow>);
     }
     return (
-      <div>
+      <div className={classes.body}>
         <div>
           <FormControl className={classes.formControl}>
             <InputLabel htmlFor="column">Column</InputLabel>
@@ -304,12 +315,16 @@ class ElasticView extends React.PureComponent<IElasticViewProps> {
             确定
           </Button>
         </div>
-        <div>
-          <Paper className={classes.tableContainer}>
-            <Table className={classes.table}>
+        <div className={classes.tableContainer}>
+          <Paper className={classes.tableContent}>
+            <Table>
               <TableHead>
                 <TableRow>
-                  <TableCell className={classes.tableHead}>
+                  <TableCell
+                    className={`${this.props.classes.tableCheckbox} ${
+                      this.props.classes.tableCheckAll
+                    }`}
+                  >
                     <Checkbox onChange={this.handleCheckAll} />
                   </TableCell>
                   {tableHeaders}
@@ -323,11 +338,7 @@ class ElasticView extends React.PureComponent<IElasticViewProps> {
                     const isSelected = this.isSelected(n.id);
                     for (const key in n) {
                       if (key !== "id") {
-                        rows.push(
-                          <TableCell className={classes.tableRows}>
-                            {n[key]}
-                          </TableCell>
-                        );
+                        rows.push(<TableCell>{n[key]}</TableCell>);
                       }
                     }
                     return (
@@ -338,7 +349,7 @@ class ElasticView extends React.PureComponent<IElasticViewProps> {
                         // tslint:disable-next-line:jsx-no-lambda
                         onClick={event => this.handleClickRow(event, n.id)}
                       >
-                        <TableCell className={classes.tableRows}>
+                        <TableCell className={classes.tableCheckbox}>
                           <Checkbox checked={isSelected} />
                         </TableCell>
                         {rows}
@@ -347,24 +358,24 @@ class ElasticView extends React.PureComponent<IElasticViewProps> {
                   })}
               </TableBody>
             </Table>
-            <TablePagination
-              className={classes.tablePagination}
-              component="div"
-              count={data.length}
-              rowsPerPage={rowsPerPage}
-              page={page}
-              backIconButtonProps={{
-                "aria-label": "Previous Page"
-              }}
-              nextIconButtonProps={{
-                "aria-label": "Next Page"
-              }}
-              onChangePage={this.handleChangePage}
-              onChangeRowsPerPage={this.handleChangeRowsPerPage}
-              rowsPerPageOptions={[10, 25, 50]}
-            />
           </Paper>
         </div>
+        <TablePagination
+          className={classes.tablePagination}
+          component="div"
+          count={data.length}
+          rowsPerPage={rowsPerPage}
+          page={page}
+          backIconButtonProps={{
+            "aria-label": "Previous Page"
+          }}
+          nextIconButtonProps={{
+            "aria-label": "Next Page"
+          }}
+          onChangePage={this.handleChangePage}
+          onChangeRowsPerPage={this.handleChangeRowsPerPage}
+          rowsPerPageOptions={[10, 25, 50]}
+        />
         <div className={classes.bottomToolBar}>
           <span className={classes.recordNum}>记录总数：{data.length}</span>
           <Button
