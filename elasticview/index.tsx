@@ -1,9 +1,11 @@
+import { Dialog, DialogTitle, Divider, Icon, Paper } from "@material-ui/core";
 import Checkbox from "@material-ui/core/Checkbox";
 import FormControl from "@material-ui/core/FormControl";
+import IconButton from "@material-ui/core/IconButton";
 import Input from "@material-ui/core/Input";
+import InputAdornment from "@material-ui/core/InputAdornment";
 import InputLabel from "@material-ui/core/InputLabel";
 import NativeSelect from "@material-ui/core/NativeSelect";
-import Paper from "@material-ui/core/Paper";
 import { Theme, WithStyles, withStyles } from "@material-ui/core/styles";
 import createStyles from "@material-ui/core/styles/createStyles";
 import Table from "@material-ui/core/Table";
@@ -12,11 +14,9 @@ import TableCell from "@material-ui/core/TableCell";
 import TableHead from "@material-ui/core/TableHead";
 import TablePagination from "@material-ui/core/TablePagination";
 import TableRow from "@material-ui/core/TableRow";
-import TextField from "@material-ui/core/TextField";
 import * as React from "react";
 import { IElementComponent } from "src/dbweb-core/eleContext";
 import { eleComponent } from "src/dbweb-core/store";
-
 import * as actions from "./action";
 import { IRow } from "./action";
 import reducer from "./reducer";
@@ -39,11 +39,12 @@ const styles = (theme: Theme) =>
       fontSize: 12
     },
     tableContainer: {
-      width: "100%"
-    },
-    tableContent: {
-      height: "72vh",
+      width: "100%",
+      height: "81.5vh",
       overflow: "auto"
+    },
+    tableBody: {
+      backgroundColor: "#fff"
     },
     selectEmpty: {
       marginTop: theme.spacing.unit * 2
@@ -93,6 +94,21 @@ const styles = (theme: Theme) =>
     },
     recordNum: {
       margin: 20
+    },
+    editSearch: {
+      height: "50vh",
+      width: "40vw",
+      padding: 30
+    },
+    editSearchInput: {
+      width: "100%",
+      border: "1px solid",
+      borderColor: "#80bdff",
+      boxShadow: "0 0 0 0.1rem rgba(0,123,255,.25)"
+    },
+    dialogButton: {
+      margin: 10,
+      float: "right"
     }
   });
 
@@ -118,7 +134,9 @@ class ElasticView extends React.PureComponent<IElasticViewProps> {
     searchContent: "",
     page: 0,
     rowsPerPage: 50,
-    selected: [""]
+    selected: [""],
+    isEditSearchOpen: false,
+    newSearchValue: ""
   };
 
   public componentWillMount() {
@@ -207,6 +225,24 @@ class ElasticView extends React.PureComponent<IElasticViewProps> {
     }
   };
 
+  public handleCloseSearch = () => {
+    this.setState({ isEditSearchOpen: false });
+  };
+
+  public handleOpenSearch = () => {
+    this.setState({ isEditSearchOpen: true });
+  };
+
+  public editSearchConfirm = () => {
+    const newValue = this.state.newSearchValue.split("\n").join(",");
+    this.setState({ searchContent: newValue });
+    this.handleCloseSearch();
+  };
+
+  public onChangeEditSearch = (event: any) => {
+    this.setState({ newSearchValue: event.target.value });
+  };
+
   public render() {
     const { classes } = this.props;
     const { data } = this.props;
@@ -223,10 +259,7 @@ class ElasticView extends React.PureComponent<IElasticViewProps> {
     }
 
     // tslint:disable-next-line:no-console
-    console.log(mapping);
-
-    // tslint:disable-next-line:no-console
-    console.log(data);
+    // console.log(data);
     // tslint:disable-next-line:forin
     for (const key in mapping) {
       tableHeaders.push(
@@ -251,73 +284,113 @@ class ElasticView extends React.PureComponent<IElasticViewProps> {
     }
     return (
       <div className={classes.body}>
-        <div>
-          <FormControl className={classes.formControl}>
-            <InputLabel htmlFor="column">Column</InputLabel>
-            <NativeSelect
-              value={this.state.column}
-              onChange={this.handleChange("column")}
-              input={<Input name="column" id="column" />}
-            >
-              <option value="" />
-              {columnOptions}
-            </NativeSelect>
-          </FormControl>
-
-          <FormControl className={classes.formControl}>
-            <InputLabel htmlFor="operator">Operator</InputLabel>
-            <NativeSelect
-              value={this.state.operator}
-              onChange={this.handleChange("operator")}
-              input={<Input name="operator" id="operator" />}
-            >
-              <option value="" />
-              <option value="=">=（等于）</option>
-              <option value="?">?（包含）</option>
-              <option value="?>">?>（前缀）</option>
-              <option value="e">e（为空）</option>
-              <option value="!=">!=（不等于）</option>
-              <option value=">">>（大于）</option>
-              <option value=">=">>=（大于等于）</option>
-              <option value="<">&lt;（小于）</option>
-              <option value="<=">&lt;=（小于等于）</option>
-              <option value="!?">!?（不包含）</option>
-              <option value="!?>">!?>（非前缀）</option>
-              <option value="<?">&lt;?（后缀）</option>
-              <option value="!<?">!&lt;?（非后缀）</option>
-              <option value="in">in（在列表）</option>
-              <option value="!in">!in（不在列表）</option>
-              <option value="~">~（在列表）</option>
-              <option value="!~">!~（非正则）</option>
-              <option value="!e">!e（非空）</option>
-              <option value="_">_（长度等于）</option>
-              <option value="!_">!_（长度不等于）</option>
-              <option value="_>">_>（长度大于）</option>
-              <option value="_<">_&lt;（长度小于）</option>
-            </NativeSelect>
-          </FormControl>
-          <FormControl>
-            <TextField
-              id="searchContent"
-              label="Search for..."
-              margin="normal"
-              onChange={this.handleChange("searchContent")}
-              onKeyPress={this.handleKeyPress}
-            />
-          </FormControl>
-
-          <Button
-            variant="contained"
-            color="primary"
-            className={classes.searchButton}
-            onClick={this.handleSearch}
-          >
-            确定
-          </Button>
-        </div>
         <div className={classes.tableContainer}>
-          <Paper className={classes.tableContent}>
-            <Table>
+          <div>
+            <FormControl className={classes.formControl}>
+              <InputLabel htmlFor="column">Column</InputLabel>
+              <NativeSelect
+                value={this.state.column}
+                onChange={this.handleChange("column")}
+                input={<Input name="column" id="column" />}
+              >
+                <option value="" />
+                {columnOptions}
+              </NativeSelect>
+            </FormControl>
+
+            <FormControl className={classes.formControl}>
+              <InputLabel htmlFor="operator">Operator</InputLabel>
+              <NativeSelect
+                value={this.state.operator}
+                onChange={this.handleChange("operator")}
+                input={<Input name="operator" id="operator" />}
+              >
+                <option value="" />
+                <option value="=">=（等于）</option>
+                <option value="?">?（包含）</option>
+                <option value="?>">?>（前缀）</option>
+                <option value="e">e（为空）</option>
+                <option value="!=">!=（不等于）</option>
+                <option value=">">>（大于）</option>
+                <option value=">=">>=（大于等于）</option>
+                <option value="<">&lt;（小于）</option>
+                <option value="<=">&lt;=（小于等于）</option>
+                <option value="!?">!?（不包含）</option>
+                <option value="!?>">!?>（非前缀）</option>
+                <option value="<?">&lt;?（后缀）</option>
+                <option value="!<?">!&lt;?（非后缀）</option>
+                <option value="in">in（在列表）</option>
+                <option value="!in">!in（不在列表）</option>
+                <option value="~">~（正则）</option>
+                <option value="!~">!~（非正则）</option>
+                <option value="!e">!e（非空）</option>
+                <option value="_">_（长度等于）</option>
+                <option value="!_">!_（长度不等于）</option>
+                <option value="_>">_>（长度大于）</option>
+                <option value="_<">_&lt;（长度小于）</option>
+              </NativeSelect>
+            </FormControl>
+            <FormControl>
+              <InputLabel htmlFor="searchContent">Search for...</InputLabel>
+              <Input
+                value={this.state.searchContent}
+                id="searchContent"
+                onChange={this.handleChange("searchContent")}
+                onKeyPress={this.handleKeyPress}
+                endAdornment={
+                  <InputAdornment position="end">
+                    <IconButton>
+                      <Icon onClick={this.handleOpenSearch}>edit</Icon>
+                    </IconButton>
+                  </InputAdornment>
+                }
+              />
+              <Dialog
+                onClose={this.handleCloseSearch}
+                aria-labelledby="simple-dialog-title"
+                open={this.state.isEditSearchOpen}
+              >
+                <DialogTitle id="simple-dialog-title">
+                  在列表的值编辑
+                </DialogTitle>
+                <Divider />
+                <div className={classes.editSearch}>
+                  <Input
+                    multiline={true}
+                    rows={12}
+                    className={classes.editSearchInput}
+                    onChange={this.onChangeEditSearch}
+                  />
+                  <Button
+                    variant="contained"
+                    color="primary"
+                    className={classes.dialogButton}
+                    onClick={this.editSearchConfirm}
+                  >
+                    确定
+                  </Button>
+                  <Button
+                    variant="contained"
+                    className={classes.dialogButton}
+                    onClick={this.handleCloseSearch}
+                  >
+                    取消
+                  </Button>
+                </div>
+              </Dialog>
+            </FormControl>
+
+            <Button
+              variant="contained"
+              color="primary"
+              className={classes.searchButton}
+              onClick={this.handleSearch}
+            >
+              确定
+            </Button>
+          </div>
+          <Paper>
+            <Table className={classes.tableBody}>
               <TableHead>
                 <TableRow>
                   <TableCell
@@ -336,10 +409,9 @@ class ElasticView extends React.PureComponent<IElasticViewProps> {
                   .map(n => {
                     const rows = [];
                     const isSelected = this.isSelected(n.id);
-                    for (const key in n) {
-                      if (key !== "id") {
-                        rows.push(<TableCell>{n[key]}</TableCell>);
-                      }
+                    // tslint:disable-next-line:forin
+                    for (const key in mapping) {
+                      rows.push(<TableCell>{n[key]}</TableCell>);
                     }
                     return (
                       <TableRow
