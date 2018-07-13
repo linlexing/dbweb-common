@@ -121,6 +121,7 @@ interface IElasticViewProps
 }
 class ElasticView extends React.PureComponent<IElasticViewProps> {
   public state = {
+    // columns to be selected from db
     DisplayColumns: [
       { Column: "NAME", Label: "名称", Hidden: false, Order: Order.None },
       { Column: "LABEL", Label: "标签", Hidden: false, Order: Order.None },
@@ -129,21 +130,22 @@ class ElasticView extends React.PureComponent<IElasticViewProps> {
       { Column: "PUB", Label: "公共", Hidden: false, Order: Order.None },
       { Column: "CATEGORY", Label: "类别", Hidden: false, Order: Order.None }
     ],
-    column: "",
-    operator: "",
-    searchContent: "",
-    page: 0,
-    rowsPerPage: 50,
-    selected: [""],
-    isEditSearchOpen: false,
-    newSearchValue: ""
+    column: "" /* "Column" field of the search parameter inputs */,
+    operator: "" /* "Operator" field of the search parameter inputs */,
+    searchContent:
+      "" /* "Search For..." field of the search parameter inputs */,
+    page: 0 /* current page*/,
+    rowsPerPage: 50 /* rows per page */,
+    selected: [""] /* ids of selected rows */,
+    isEditSearchOpen: false /* state to control if editing search content list is open */,
+    newSearchValue:
+      "" /* stores the input value in the editing search content list window */
   };
 
   public componentWillMount() {
     if (this.props.element.SignStr) {
       // tslint:disable-next-line:no-console
       console.log("fetchdata");
-      // this.props.fetchData(this.props.element.Name, this.props.element.SignStr, { Query: [{ Column: "DEPT", Operate: "=", Value: "r" }] });
       let { searchRequestData } = this.props;
       searchRequestData = {
         DisplayColumns: this.state.DisplayColumns
@@ -156,6 +158,7 @@ class ElasticView extends React.PureComponent<IElasticViewProps> {
     }
   }
 
+  /* on click of the "select all rows" checkbox */
   public handleCheckAll = (event: any, checked: boolean) => {
     if (checked) {
       this.setState(state => ({ selected: this.props.data.map(n => n.id) }));
@@ -164,8 +167,10 @@ class ElasticView extends React.PureComponent<IElasticViewProps> {
     this.setState({ selected: [] });
   };
 
+  /* returns if the row is selected */
   public isSelected = (id: any) => this.state.selected.indexOf(id) !== -1;
 
+  /* on click of selecting a row */
   public handleClickRow = (event: any, id: string) => {
     const { selected } = this.state;
     const selectedIndex = selected.indexOf(id);
@@ -186,6 +191,7 @@ class ElasticView extends React.PureComponent<IElasticViewProps> {
     this.setState({ selected: newSelected });
   };
 
+  /* handle change of the "Column", "Operator", "Search for..." inputs */
   public handleChange = (name: string) => (event: any) => {
     this.setState({ [name]: event.target.value });
   };
@@ -198,6 +204,7 @@ class ElasticView extends React.PureComponent<IElasticViewProps> {
     this.setState({ rowsPerPage: event.target.value });
   };
 
+  /* triggers search when enter is pressed when cursor is at "Search for" input */
   public handleKeyPress = (event: any) => {
     // Trigger search when Enter is pressed in textfield
     if (event.key === "Enter") {
@@ -230,11 +237,22 @@ class ElasticView extends React.PureComponent<IElasticViewProps> {
   };
 
   public handleOpenSearch = () => {
-    this.setState({ isEditSearchOpen: true });
+    this.setState({
+      isEditSearchOpen: true,
+      newSearchValue: this.state.searchContent.split(",").join("\n")
+    });
   };
 
   public editSearchConfirm = () => {
-    const newValue = this.state.newSearchValue.split("\n").join(",");
+    const arr = this.state.newSearchValue.split("\n");
+    for (let i = 0; i < arr.length; i++) {
+      let s = arr[i];
+      if (s.includes(",")) {
+        s = '"' + s + '"';
+        arr[i] = s;
+      }
+    }
+    const newValue = arr.join(",");
     this.setState({ searchContent: newValue });
     this.handleCloseSearch();
   };
@@ -360,6 +378,7 @@ class ElasticView extends React.PureComponent<IElasticViewProps> {
                     rows={12}
                     className={classes.editSearchInput}
                     onChange={this.onChangeEditSearch}
+                    defaultValue={this.state.newSearchValue}
                   />
                   <Button
                     variant="contained"
