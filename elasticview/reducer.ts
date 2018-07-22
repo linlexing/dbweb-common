@@ -12,14 +12,14 @@ export interface IElasticViewState {
 	readonly queryOpeColumn?: string;
 	readonly queryValue?: string;
 }
-interface TermRow {
-	func?: string;
-	column?: string;
-	operate?: string;
-	opeFunc?: string;
-	opeColumn?: string;
-	value?: string;
-}
+// interface TermRow {
+// 	func?: string;
+// 	column?: string;
+// 	operate?: string;
+// 	opeFunc?: string;
+// 	opeColumn?: string;
+// 	value?: string;
+// }
 type Actions = ActionType<typeof actions>;
 export default (state: IElasticViewState = {}, action: Actions): IElasticViewState => {
 	switch (action.type) {
