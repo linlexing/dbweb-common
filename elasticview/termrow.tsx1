@@ -1,0 +1,73 @@
+import TextField from '@material-ui/core/TextField';
+import * as React from 'react';
+
+// 字段或者函数返回值的类型，决定着哪些运算符可以使用
+enum dataType {
+	Number = 'number',
+	String = 'string',
+	Date = 'date',
+	Binary = 'binary',
+	Bool = 'bool'
+}
+// 左值类别
+enum leftType {
+	Column = 'column',
+	Express = 'express'
+}
+// 右值类别
+enum rightType {
+	Value = 'value',
+	Column = 'column',
+	Express = 'express'
+}
+// 字段信息
+interface IColumn {
+	name: string;
+	type: dataType;
+}
+// 函数的参数
+interface IParam {
+	name: string;
+	type: dataType;
+}
+// 可以使用的函数，每个函数的入参及返回值类型
+interface IFunc {
+	name: string;
+	params: IParam[];
+	revType: dataType;
+}
+interface ITermRowProps {
+	leftValue?: string;
+	leftType?: leftType;
+	operate?: string;
+	rightValue?: string;
+	rightType?: rightType;
+	columns: IColumn[];
+	funcs: IFunc[];
+}
+class TermRow extends React.PureComponent<ITermRowProps> {
+	public render() {
+		const { leftValue, queryFunc } = this.props;
+		return (
+			<div>
+				<TextField
+					select={true}
+					label="指标"
+					value={this.state.weightRange}
+					onChange={this.handleChange('weightRange')}
+					InputProps={{
+						startAdornment: <InputAdornment position="start">Kg</InputAdornment>
+					}}>
+					{ranges.map(option => (
+						<MenuItem key={option.value} value={option.value}>
+							{option.label}
+						</MenuItem>
+					))}
+				</TextField>
+				<TextField id="leftValue" select={true} label="指标" value={leftValue} />
+
+				<TextField id="columnName" select={true} label="指标" value={queryColumn} />
+			</div>
+		);
+	}
+}

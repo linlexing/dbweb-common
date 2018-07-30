@@ -2,7 +2,7 @@ import { Avatar, Grid, List, ListItem, Paper, Theme, Typography, WithStyles, wit
 import * as React from 'react';
 import { Dispatch } from 'react-redux';
 import { compose } from 'redux';
-import { IElement } from 'src/dbweb-core/model';
+import { IElement } from '../../../dbweb-core/model';
 
 import { APIGet } from '../../../dbweb-core/api';
 import { IElementComponent } from '../../../dbweb-core/eleContext';

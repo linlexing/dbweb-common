@@ -12,7 +12,7 @@ import { Theme, WithStyles, withStyles } from '@material-ui/core/styles';
 import createStyles from '@material-ui/core/styles/createStyles';
 import * as React from 'react';
 import { Dispatch } from 'redux';
-import { eleComponent } from 'src/dbweb-core/store';
+import { eleComponent } from '../../../dbweb-core/store';
 
 import { IElementComponent } from '../../../dbweb-core/eleContext';
 import { login } from '../../../dbweb-core/login';

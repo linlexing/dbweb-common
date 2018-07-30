@@ -1,7 +1,6 @@
 import { Dispatch } from 'redux';
-import { APIPost } from 'src/dbweb-core/api';
 import { createAction } from 'typesafe-actions';
-
+import { APIPost } from '../../../dbweb-core/api';
 import { IFetchDataParam } from './service';
 
 export interface IRow {

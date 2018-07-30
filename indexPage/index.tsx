@@ -1,12 +1,14 @@
 import { Button, Input } from '@material-ui/core';
 import * as React from 'react';
+import { FormattedMessage } from 'react-intl';
 import { RouteComponentProps } from 'react-router-dom';
 import { Dispatch } from 'redux';
-import { eleComponent } from 'src/dbweb-core/store';
-
-import { APIGet } from 'src/dbweb-core/api';
-import { IElementComponent } from 'src/dbweb-core/eleContext';
+import { APIGet } from '../../../dbweb-core/api';
+import { IElementComponent } from '../../../dbweb-core/eleContext';
+import { eleComponent } from '../../../dbweb-core/store';
 import * as actions from './action';
+import message from './locales';
+import { HERE } from './locales/ids';
 import reducer from './reducer';
 
 interface IIndex extends RouteComponentProps<any>, IElementComponent {
@@ -17,7 +19,8 @@ class Index extends React.PureComponent<IIndex> {
 	public render() {
 		return (
 			<div>
-				这里是{this.props.element.Name}
+				<FormattedMessage id={HERE} />
+				{this.props.element.Name}
 				<Button onClick={this.click}>click me</Button>
 				<Input value={this.props.userName} onChange={this.props.userNameChange} />
 			</div>
@@ -35,4 +38,4 @@ const mapDispatch = (dispatch: Dispatch) => {
 		userNameChange: (event: any) => dispatch(actions.changeUserName(event.target.value))
 	};
 };
-export default eleComponent(mapState, mapDispatch, reducer)(Index);
+export default eleComponent(mapState, mapDispatch, reducer, message)(Index);
