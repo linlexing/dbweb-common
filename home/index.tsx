@@ -24,22 +24,25 @@ import { connect } from 'react-redux';
 import { Switch } from 'react-router';
 import { Link, Route, RouteComponentProps } from 'react-router-dom';
 import { compose } from 'redux';
-import { logout } from '../../../dbweb-core/login';
-import MainComponent from '../../../dbweb-core/main/content';
-import { elementRouterURL, IDept, IElement } from '../../../dbweb-core/model';
-import withStatic from '../../../dbweb-core/withStatic';
+import { logout } from 'src/dbweb-core/login';
+import MainComponent from 'src/dbweb-core/main/content';
+import { elementRouterURL, IDept, IElement } from 'src/dbweb-core/model';
+import * as rootActions from 'src/dbweb-core/root/action';
+import withStatic from 'src/dbweb-core/withStatic';
 import * as actions from './action';
 import DeptList from './deptList';
 import { clearText } from './label';
+import LanguageMenuItem from './langMenuItem';
 import Menus from './menus';
 import { NotFound } from './notfound';
 import reducer, { IHomeStore } from './reducer';
 import { clsNames, styles } from './style';
-
 interface IHomeEvents {
 	openMenu: () => any;
 	hideMenu: () => any;
 	toggleUserMenu: (open: boolean) => any;
+	toggleLangMenu: (open: boolean) => any;
+	setLanguage: (lang: string) => any;
 }
 interface IHomeProps extends IHomeEvents, IHomeStore, RouteComponentProps<any>, WithStyles<clsNames> {
 	projectLabel: string;
@@ -52,155 +55,33 @@ interface IHomeProps extends IHomeEvents, IHomeStore, RouteComponentProps<any>, 
 	serviceVersion: number;
 	brand: string;
 	selElement: IElement;
+	language: string;
 }
 interface IStates {
 	userMenuAnchorEl: HTMLElement | null;
+	langMenuAnchorEl: HTMLElement | null;
 }
 class Home extends React.PureComponent<IHomeProps, IStates> {
 	constructor(props: IHomeProps) {
 		super(props);
 		this.state = {
-			userMenuAnchorEl: null
+			userMenuAnchorEl: null,
+			langMenuAnchorEl: null
 		};
 		this.onUserIconClick = this.onUserIconClick.bind(this);
 		this.onUserMenuClose = this.onUserMenuClose.bind(this);
+		this.onLangIconClick = this.onLangIconClick.bind(this);
+		this.onLangMenuClose = this.onLangMenuClose.bind(this);
 		this.logout = this.logout.bind(this);
 	}
+
 	public render() {
-		const {
-			menuOpen,
-			userMenuOpen,
-			classes,
-			theme,
-			elements,
-			publicEles,
-			projectLabel,
-			openMenu,
-			hideMenu,
-			userName,
-			dept,
-			brand,
-			serviceVersion,
-			nextLevelDept,
-			toRootDept
-		} = this.props;
-		const { userMenuAnchorEl } = this.state;
-		const selEleName = location.pathname.split('/');
-		let selEle;
-		// let userBtn;
-		// if (this.userButton.current) {
-		//     userBtn = this.userButton.current;
-		// }
-		if (selEleName.length > 2) {
-			selEle = _.find(elements, { Name: decodeURIComponent(selEleName[2]) });
-			if (!selEle) {
-				selEle = _.find(publicEles, { Name: decodeURIComponent(selEleName[2]) });
-			}
-		}
+		const { menuOpen, classes, elements, publicEles } = this.props;
+
 		return (
 			<div className={classes.appFrame}>
-				<AppBar
-					className={classNames(classes.appBar, {
-						[classes.appBarShift]: menuOpen
-					})}>
-					<Toolbar disableGutters={!menuOpen}>
-						<IconButton
-							color="inherit"
-							aria-label="open drawer"
-							onClick={openMenu}
-							className={classNames(classes.menuButton, menuOpen && classes.hide)}>
-							<Icon>menu</Icon>
-						</IconButton>
-						<Typography variant="title" color="inherit" noWrap={true} className={classes.toolbarText}>
-							{selEle ? clearText(selEle.Label) : 'not found'}
-						</Typography>
-
-						<Tooltip title={userName + ' ' + dept.Code + '.' + dept.Name}>
-							<IconButton color="inherit" onClick={this.onUserIconClick}>
-								<Icon>account_circle</Icon>
-							</IconButton>
-						</Tooltip>
-						<Menu
-							id="userMenu"
-							anchorEl={userMenuAnchorEl}
-							open={userMenuOpen}
-							onClose={this.onUserMenuClose}
-							anchorReference="anchorEl"
-							getContentAnchorEl={undefined} // 这一行必须要加，参见：https://github.com/mui-org/material-ui/issues/10804
-							anchorOrigin={{ vertical: 'bottom', horizontal: 'left' }}
-							disableAutoFocusItem={true}>
-							<MenuList role="menu">
-								<MenuItem onClick={this.logout}>
-									<ListItemIcon>
-										<Icon>exit_to_app</Icon>
-									</ListItemIcon>
-									<ListItemText primary="退出系统" inset={true} />
-								</MenuItem>
-								{nextLevelDept.map(val => <DeptList key={val.Code} dept={val} />)}
-								{toRootDept.length > 0 ? <Divider /> : null}
-								{toRootDept.length > 0
-									? toRootDept.map(val => <DeptList key={val.Code} dept={val} />)
-									: null}
-							</MenuList>
-						</Menu>
-						<IconButton color="inherit">
-							<Badge badgeContent={4} color="secondary">
-								<Icon>notifications</Icon>
-							</Badge>
-						</IconButton>
-						<IconButton color="inherit" style={{ marginRight: menuOpen ? 0 : 24 }}>
-							<Icon>language</Icon>
-						</IconButton>
-					</Toolbar>
-				</AppBar>
-				<Drawer
-					variant="persistent"
-					anchor="left"
-					open={menuOpen}
-					classes={{
-						paper: classes.drawerPaper
-					}}>
-					<div className={classes.drawerHeader}>
-						<div
-							style={{
-								display: 'flex',
-								flexDirection: 'column',
-								paddingLeft: 20,
-								color: theme ? theme.palette.grey['600'] : undefined
-							}}>
-							<Typography
-								variant="title"
-								color="inherit"
-								noWrap={true}
-								style={{
-									display: 'flex',
-									flexDirection: 'row',
-									justifyItems: 'center',
-									marginBottom: 4,
-									fontWeight: theme ? theme.typography.fontWeightRegular : undefined
-								}}>
-								<Icon>{brand.length > 0 ? brand : 'home'}</Icon>
-								<span>{projectLabel}</span>
-							</Typography>
-							<Typography variant="caption" color="inherit" noWrap={true}>
-								版本:<Link
-									style={{ textDecoration: 'none', color: 'inherit' }}
-									to={elementRouterURL('version')}>
-									{serviceVersion}
-								</Link>
-							</Typography>
-						</div>
-						<IconButton onClick={hideMenu} style={{ color: theme && theme.palette.grey['500'] }}>
-							{theme && theme.direction === 'rtl' ? (
-								<Icon>chevron_right</Icon>
-							) : (
-								<Icon>chevron_left</Icon>
-							)}
-						</IconButton>
-					</div>
-					<Divider />
-					<Menus />
-				</Drawer>
+				{this.renderAppBar()}
+				{this.renderLeftMenu()}
 				<main
 					className={classNames(classes.content, classes[`content-left`], {
 						[classes.contentShift]: menuOpen,
@@ -224,6 +105,160 @@ class Home extends React.PureComponent<IHomeProps, IStates> {
 			</div>
 		);
 	}
+	private renderUserMenu() {
+		const { userMenuOpen, nextLevelDept, toRootDept } = this.props;
+		const { userMenuAnchorEl } = this.state;
+		return (
+			<Menu
+				id="userMenu"
+				anchorEl={userMenuAnchorEl}
+				open={userMenuOpen}
+				onClose={this.onUserMenuClose}
+				anchorReference="anchorEl"
+				getContentAnchorEl={undefined} // 这一行必须要加，参见：https://github.com/mui-org/material-ui/issues/10804
+				anchorOrigin={{ vertical: 'bottom', horizontal: 'left' }}
+				disableAutoFocusItem={true}>
+				<MenuList role="menu">
+					<MenuItem onClick={this.logout}>
+						<ListItemIcon>
+							<Icon>exit_to_app</Icon>
+						</ListItemIcon>
+						<ListItemText primary="退出系统" inset={true} />
+					</MenuItem>
+					{nextLevelDept.map(val => <DeptList key={val.Code} dept={val} />)}
+					{toRootDept.length > 0 ? <Divider /> : null}
+					{toRootDept.length > 0 ? toRootDept.map(val => <DeptList key={val.Code} dept={val} />) : null}
+				</MenuList>
+			</Menu>
+		);
+	}
+	private renderAppBar() {
+		const { menuOpen, classes, elements, publicEles, openMenu, userName, dept } = this.props;
+		const selEleName = location.pathname.split('/');
+		let selEle;
+
+		if (selEleName.length > 2) {
+			selEle = _.find(elements, { Name: decodeURIComponent(selEleName[2]) });
+			if (!selEle) {
+				selEle = _.find(publicEles, { Name: decodeURIComponent(selEleName[2]) });
+			}
+		}
+		return (
+			<AppBar
+				className={classNames(classes.appBar, {
+					[classes.appBarShift]: menuOpen
+				})}>
+				<Toolbar disableGutters={!menuOpen}>
+					<IconButton
+						color="inherit"
+						aria-label="open drawer"
+						onClick={openMenu}
+						className={classNames(classes.menuButton, menuOpen && classes.hide)}>
+						<Icon>menu</Icon>
+					</IconButton>
+					<Typography variant="title" color="inherit" noWrap={true} className={classes.toolbarText}>
+						{selEle ? clearText(selEle.Label) : 'not found'}
+					</Typography>
+
+					<Tooltip title={userName + ' ' + dept.Code + '.' + dept.Name}>
+						<IconButton color="inherit" onClick={this.onUserIconClick}>
+							<Icon>account_circle</Icon>
+						</IconButton>
+					</Tooltip>
+					{this.renderUserMenu()}
+					<IconButton color="inherit">
+						<Badge badgeContent={4} color="secondary">
+							<Icon>notifications</Icon>
+						</Badge>
+					</IconButton>
+					<IconButton
+						color="inherit"
+						style={{ marginRight: menuOpen ? 0 : 24 }}
+						onClick={this.onLangIconClick}>
+						<Icon>language</Icon>
+					</IconButton>
+					{this.renderLanguageMenu()}
+				</Toolbar>
+			</AppBar>
+		);
+	}
+	private renderLanguageMenu() {
+		const { langMenuAnchorEl } = this.state;
+		const { langMenuOpen } = this.props;
+		const languages = [{ code: 'en', name: 'English' }, { code: 'zh-CN', name: '中文(简体)' }];
+		return (
+			<Menu
+				id="langMenu"
+				anchorEl={langMenuAnchorEl}
+				open={langMenuOpen}
+				onClose={this.onLangMenuClose}
+				anchorReference="anchorEl"
+				getContentAnchorEl={undefined} // 这一行必须要加，参见：https://github.com/mui-org/material-ui/issues/10804
+				anchorOrigin={{ vertical: 'bottom', horizontal: 'left' }}
+				disableAutoFocusItem={true}>
+				<MenuList role="menu">
+					{_.map(languages, lange => (
+						<LanguageMenuItem
+							key={lange.code}
+							code={lange.code}
+							name={lange.name}
+							onClick={this.onLangMenuClose}
+						/>
+					))}
+				</MenuList>
+			</Menu>
+		);
+	}
+
+	private renderLeftMenu() {
+		const { menuOpen, classes, theme, projectLabel, hideMenu, brand, serviceVersion } = this.props;
+		return (
+			<Drawer
+				variant="persistent"
+				anchor="left"
+				open={menuOpen}
+				classes={{
+					paper: classes.drawerPaper
+				}}>
+				<div className={classes.drawerHeader}>
+					<div
+						style={{
+							display: 'flex',
+							flexDirection: 'column',
+							paddingLeft: 20,
+							color: theme ? theme.palette.grey['600'] : undefined
+						}}>
+						<Typography
+							variant="title"
+							color="inherit"
+							noWrap={true}
+							style={{
+								display: 'flex',
+								flexDirection: 'row',
+								justifyItems: 'center',
+								marginBottom: 4,
+								fontWeight: theme ? theme.typography.fontWeightRegular : undefined
+							}}>
+							<Icon>{brand.length > 0 ? brand : 'home'}</Icon>
+							<span>{projectLabel}</span>
+						</Typography>
+						<Typography variant="caption" color="inherit" noWrap={true}>
+							版本:<Link
+								style={{ textDecoration: 'none', color: 'inherit' }}
+								to={elementRouterURL('version')}>
+								{serviceVersion}
+							</Link>
+						</Typography>
+					</div>
+					<IconButton onClick={hideMenu} style={{ color: theme && theme.palette.grey['500'] }}>
+						{theme && theme.direction === 'rtl' ? <Icon>chevron_right</Icon> : <Icon>chevron_left</Icon>}
+					</IconButton>
+				</div>
+				<Divider />
+				<Menus />
+			</Drawer>
+		);
+	}
 
 	private onUserIconClick(event: React.MouseEvent<HTMLElement>) {
 		if (!this.props.userMenuOpen) {
@@ -233,13 +268,26 @@ class Home extends React.PureComponent<IHomeProps, IStates> {
 		}
 		this.props.toggleUserMenu(!this.props.userMenuOpen);
 	}
+	private onLangIconClick(event: React.MouseEvent<HTMLElement>) {
+		if (!this.props.langMenuOpen) {
+			this.setState({ langMenuAnchorEl: event.currentTarget });
+		} else {
+			this.setState({ langMenuAnchorEl: null });
+		}
+		this.props.toggleLangMenu(!this.props.langMenuOpen);
+	}
 	private logout() {
 		this.props.toggleUserMenu(false);
+		this.props.toggleLangMenu(false);
 		logout();
 	}
 	private onUserMenuClose() {
 		this.setState({ userMenuAnchorEl: null });
 		this.props.toggleUserMenu(false);
+	}
+	private onLangMenuClose() {
+		this.setState({ langMenuAnchorEl: null });
+		this.props.toggleLangMenu(false);
 	}
 }
 
@@ -253,12 +301,15 @@ const mapStateToProps = (state: any) => ({
 	brand: state.root.brand,
 	serviceVersion: state.root.serviceVersion,
 	toRootDept: state.root.toRootDept,
-	nextLevelDept: state.root.nextLevelDept
+	nextLevelDept: state.root.nextLevelDept,
+	language: state.root.language
 });
 const mapDispatchToProps = {
 	openMenu: actions.doOpenMenu,
 	hideMenu: actions.doHideMenu,
-	toggleUserMenu: actions.doToggleUserMenu
+	toggleUserMenu: actions.doToggleUserMenu,
+	toggleLangMenu: actions.doToggleLangMenu,
+	setLanguage: rootActions.doSetLanguage
 };
 export default compose(
 	withStyles(styles, { withTheme: true }),
