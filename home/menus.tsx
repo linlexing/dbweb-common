@@ -19,6 +19,7 @@ import { clearText } from './label';
 
 interface IMenusProps extends WithStyles<clsNames>, RouteComponentProps<any> {
 	menus: ICategory;
+	language: string;
 	setMenu: (data: { path: string; openOrClose: boolean }) => any;
 }
 const styles = (theme: Theme) => ({
@@ -62,14 +63,17 @@ const styles = (theme: Theme) => ({
 });
 type clsNames = keyof ReturnType<typeof styles>;
 const mapStateToProps = (state: any) => ({
-	menus: state.root.menus
+	menus: state.root.menus,
+	language: state.root.language
 });
 const mapDispatchToProps = {
 	setMenu: actions.doSetMenu
 };
-
+function getLabel(language: string, labelEN: string, label: string): string {
+	return language === 'en' ? labelEN || label : label;
+}
 const Menus: React.SFC<IMenusProps> = props => {
-	const { classes, menus, setMenu } = props;
+	const { classes, menus, setMenu, language } = props;
 	const toItem = (item: IItem) => {
 		const MyLink = (p: any) => <Link to={item.url} {...p} />;
 		const sel = decodeURI(location.pathname) === decodeURI(item.url);
@@ -83,7 +87,7 @@ const Menus: React.SFC<IMenusProps> = props => {
 				// style={{ backgroundColor: sel ? selColor : "" }}
 				classes={{ root: classes.item }}>
 				<ListItemText
-					primary={clearText(item.label)}
+					primary={clearText(getLabel(language, item.labelEN, item.label))}
 					classes={{ primary: sel ? classes.primary_sel : classes.primary }}
 				/>
 			</ListItem>
@@ -107,7 +111,7 @@ const Menus: React.SFC<IMenusProps> = props => {
 		if (flat) {
 			list = (
 				<List key={node.key} disablePadding={true}>
-					<ListSubheader>{clearText(node.label)}</ListSubheader>
+					<ListSubheader>{clearText(getLabel(language, node.labelEN, node.label))}</ListSubheader>
 					{itemlist}
 				</List>
 			);
@@ -115,7 +119,10 @@ const Menus: React.SFC<IMenusProps> = props => {
 			list = (
 				<List key={node.key} disablePadding={true}>
 					<ListItem button={true} onClick={click} key={node.key} classes={{ root: classes.item }}>
-						<ListItemText primary={clearText(node.label)} classes={{ primary: classes.primary_cate }} />
+						<ListItemText
+							primary={clearText(getLabel(language, node.labelEN, node.label))}
+							classes={{ primary: classes.primary_cate }}
+						/>
 						{node.open ? (
 							<Icon className={classes.icon}>expand_less</Icon>
 						) : (

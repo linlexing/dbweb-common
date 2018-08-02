@@ -1,19 +1,17 @@
 import { Avatar, Grid, List, ListItem, Paper, Theme, Typography, WithStyles, withStyles } from '@material-ui/core';
 import * as React from 'react';
-import { Dispatch } from 'react-redux';
 import { compose } from 'redux';
-import { IElement } from '../../../dbweb-core/model';
-
-import { APIGet } from '../../../dbweb-core/api';
 import { IElementComponent } from '../../../dbweb-core/eleContext';
 import { eleComponent } from '../../../dbweb-core/store';
-import { doSetVersions, IChangeLog, IVersion } from './action';
+import { doSetRefreshTime, fetchVersion, IChangeLog, IVersion } from './action';
 import reducer from './reducer';
 
 interface IProps extends IElementComponent, WithStyles<typeof styles> {
 	refreshTime?: Date;
 	versions?: IVersion[];
-	getVersion: (element: IElement, refreshTime?: Date) => any;
+	language?: string;
+	rootLanguage: string;
+	fetchVersion: typeof fetchVersion;
 }
 const styles = (theme: Theme) => ({
 	root: {
@@ -40,7 +38,16 @@ class Version extends React.PureComponent<IProps> {
 		this.state = {};
 	}
 	public componentWillMount() {
-		this.props.getVersion(this.props.element, this.props.refreshTime);
+		const { element, refreshTime, language, rootLanguage } = this.props;
+		// 超过15秒 或者 首次 或者 语言被切换
+		if (
+			!refreshTime ||
+			(new Date().getTime() - new Date(refreshTime).getTime()) / 1000 > 15 ||
+			language !== rootLanguage
+		) {
+			this.props.fetchVersion(element.Name, element.SignStr, rootLanguage);
+			doSetRefreshTime(new Date());
+		}
 	}
 	public render() {
 		const { classes } = this.props;
@@ -89,20 +96,14 @@ class Version extends React.PureComponent<IProps> {
 		}
 	}
 }
+
 export default compose(
 	eleComponent(
-		state => state,
-		(dispatch: Dispatch, ownProps: any) => ({
-			getVersion: (element: IElement, refreshTime?: string) => {
-				// tslint:disable-next-line:no-console
-				console.log('refreshtime', refreshTime, typeof refreshTime);
-				if (!refreshTime || (new Date().getTime() - new Date(refreshTime).getTime()) / 1000 > 15) {
-					APIGet<IVersion[]>(element.Name, 'version', element.SignStr).then(data => {
-						dispatch(doSetVersions({ refreshTime: new Date(), versions: data.data }));
-					});
-				}
-			}
+		(state, rootState) => ({
+			...state,
+			rootLanguage: rootState.root.language
 		}),
+		{ fetchVersion, doSetRefreshTime },
 		reducer
 	),
 	withStyles(styles)

@@ -20,6 +20,7 @@ import withStyles from '@material-ui/core/styles/withStyles';
 import * as classNames from 'classnames';
 import * as _ from 'lodash';
 import * as React from 'react';
+import { FormattedMessage } from 'react-intl';
 import { connect } from 'react-redux';
 import { Switch } from 'react-router';
 import { Link, Route, RouteComponentProps } from 'react-router-dom';
@@ -29,10 +30,13 @@ import MainComponent from 'src/dbweb-core/main/content';
 import { elementRouterURL, IDept, IElement } from 'src/dbweb-core/model';
 import * as rootActions from 'src/dbweb-core/root/action';
 import withStatic from 'src/dbweb-core/withStatic';
+import { PROJECT_LABEL } from '../../../dbweb-core/store';
 import * as actions from './action';
 import DeptList from './deptList';
 import { clearText } from './label';
 import LanguageMenuItem from './langMenuItem';
+import messages from './locales';
+import { VER } from './locales/ids';
 import Menus from './menus';
 import { NotFound } from './notfound';
 import reducer, { IHomeStore } from './reducer';
@@ -133,7 +137,7 @@ class Home extends React.PureComponent<IHomeProps, IStates> {
 		);
 	}
 	private renderAppBar() {
-		const { menuOpen, classes, elements, publicEles, openMenu, userName, dept } = this.props;
+		const { language, menuOpen, classes, elements, publicEles, openMenu, userName, dept } = this.props;
 		const selEleName = location.pathname.split('/');
 		let selEle;
 
@@ -157,7 +161,9 @@ class Home extends React.PureComponent<IHomeProps, IStates> {
 						<Icon>menu</Icon>
 					</IconButton>
 					<Typography variant="title" color="inherit" noWrap={true} className={classes.toolbarText}>
-						{selEle ? clearText(selEle.Label) : 'not found'}
+						{selEle
+							? clearText(language === 'en' ? selEle.LabelEN || selEle.Label : selEle.Label)
+							: 'not found'}
 					</Typography>
 
 					<Tooltip title={userName + ' ' + dept.Code + '.' + dept.Name}>
@@ -240,10 +246,12 @@ class Home extends React.PureComponent<IHomeProps, IStates> {
 								fontWeight: theme ? theme.typography.fontWeightRegular : undefined
 							}}>
 							<Icon>{brand.length > 0 ? brand : 'home'}</Icon>
-							<span>{projectLabel}</span>
+							<span>
+								<FormattedMessage id={PROJECT_LABEL} defaultMessage={projectLabel} />
+							</span>
 						</Typography>
 						<Typography variant="caption" color="inherit" noWrap={true}>
-							版本:<Link
+							<FormattedMessage id={VER} />:<Link
 								style={{ textDecoration: 'none', color: 'inherit' }}
 								to={elementRouterURL('version')}>
 								{serviceVersion}
@@ -313,7 +321,7 @@ const mapDispatchToProps = {
 };
 export default compose(
 	withStyles(styles, { withTheme: true }),
-	withStatic(reducer),
+	withStatic(reducer, messages),
 	connect(
 		mapStateToProps,
 		mapDispatchToProps
