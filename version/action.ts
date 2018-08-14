@@ -1,6 +1,6 @@
 import { Dispatch } from 'react-redux';
-import { APIGet } from 'src/dbweb-core/api';
 import { createAction } from 'typesafe-actions';
+import { APIGet } from '../../../dbweb-core/api';
 
 export interface IChangeLog {
 	Version: number;

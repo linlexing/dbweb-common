@@ -2,9 +2,9 @@ import { Icon, ListItemIcon, ListItemText } from '@material-ui/core';
 import MenuItem from '@material-ui/core/MenuItem/MenuItem';
 import * as React from 'react';
 import { connect } from 'react-redux';
-import { IDept } from 'src/dbweb-core/model';
+import { IDept } from '../../../dbweb-core/model';
 
-import * as rootActions from 'src/dbweb-core/root/action';
+import * as rootActions from '../../../dbweb-core/root/action';
 import * as actions from './action';
 
 interface IProps {

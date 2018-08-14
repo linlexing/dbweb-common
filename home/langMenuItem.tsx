@@ -4,7 +4,7 @@ import ListItemText from '@material-ui/core/ListItemText';
 import MenuItem from '@material-ui/core/MenuItem';
 import * as React from 'react';
 import { connect } from 'react-redux';
-import * as rootActions from 'src/dbweb-core/root/action';
+import * as rootActions from '../../../dbweb-core/root/action';
 interface IProps {
 	code: string;
 	name: string;

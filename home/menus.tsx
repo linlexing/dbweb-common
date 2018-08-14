@@ -13,8 +13,8 @@ import * as React from 'react';
 import { connect } from 'react-redux';
 import { Link, RouteComponentProps, withRouter } from 'react-router-dom';
 
-import * as actions from 'src/dbweb-core/root/action';
-import { ICategory, IItem, isItem } from 'src/dbweb-core/root/list';
+import * as actions from '../../../dbweb-core/root/action';
+import { ICategory, IItem, isItem } from '../../../dbweb-core/root/list';
 import { clearText } from './label';
 
 interface IMenusProps extends WithStyles<clsNames>, RouteComponentProps<any> {

@@ -1,7 +1,7 @@
-import elasticview from './elasticview';
 import home from './home';
 import index from './indexPage';
 import login from './login';
+import recordview from './recview';
 import version from './version';
 
 export default {
@@ -9,5 +9,5 @@ export default {
 	index,
 	version,
 	login,
-	elasticview
+	recordview
 };
